@@ -1,0 +1,15 @@
+{
+	"verbose": true,
+	"ignore": [
+		"node_modules",
+		"build",
+		".git"
+	],
+	"watch": [
+		"src"
+	],
+	"events": {
+		"restart": "echo file: $FILENAME changed"
+	},
+	"ext": "ts"
+}

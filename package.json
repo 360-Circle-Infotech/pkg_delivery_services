@@ -1,0 +1,37 @@
+{
+	"name": "@qafto/pkg_delivery_services",
+	"version": "1.0.0",
+	"description": "This package contain functions related to delivery services of different service providers",
+	"private": true,
+	"main": "lib/index.js",
+	"types": "lib/index.d.ts",
+	"scripts": {
+		"watch": "tsc -p . --watch",
+		"build": "tsc -p .",
+		"format": "prettier --write \"src/**/*.(js|ts)\"",
+		"lint": "eslint src --ext .js,.ts",
+		"lint:fix": "eslint src --fix --ext .js,.ts",
+		"test": "jest --config jest.config.js",
+		"prepare": "npm run build"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"devDependencies": {
+		"@types/jest": "^29.5.2",
+		"@typescript-eslint/eslint-plugin": "^5.61.0",
+		"@typescript-eslint/parser": "^5.61.0",
+		"eslint": "^8.44.0",
+		"eslint-plugin-jest": "^27.2.2",
+		"jest": "^29.5.0",
+		"prettier": "^2.8.8",
+		"ts-jest": "^29.1.1",
+		"typescript": "^5.1.6"
+	},
+	"files": [
+		"lib/**/*"
+	],
+	"dependencies": {
+		"axios": "^1.4.0"
+	}
+}
