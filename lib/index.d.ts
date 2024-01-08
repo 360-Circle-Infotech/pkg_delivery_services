@@ -12,5 +12,9 @@ declare class Delivery {
     validateAddress: (provider: string, providerData: any) => Promise<any>;
     validatePostalCode: (provider: string, providerData: any) => Promise<any>;
     verifyCredentials: (provider: string, providerData: any) => Promise<boolean | undefined>;
+    createOrder: (providerData: any) => Promise<void>;
+    initiateFlow: (providerData: any) => Promise<void>;
+    trackOrder: (providerData: any) => Promise<void>;
+    cancelOrder: (providerData: any) => Promise<void>;
 }
 export default Delivery;

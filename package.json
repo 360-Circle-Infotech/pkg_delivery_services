@@ -32,6 +32,7 @@
 		"lib/**/*"
 	],
 	"dependencies": {
-		"axios": "^1.4.0"
+		"axios": "^1.4.0",
+		"uniqid": "^5.4.0"
 	}
 }
