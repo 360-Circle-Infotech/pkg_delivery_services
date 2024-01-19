@@ -61,11 +61,11 @@ class PORTER {
 		try {
 			const response: AxiosResponse<T> = await axios({
 				headers: {
-					'x-api-key': '09470b91-a545-4097-82f2-8ce398bad705',
+					'x-api-key': data.key,
 				},
 				method,
 				url: `${this.apiUrl}${url}`,
-				data,
+				data: data.data,
 			});
 			return response.data;
 		} catch (error: any) {
@@ -73,9 +73,32 @@ class PORTER {
 		}
 	}
 
-	public async createOrder(orderRequest: CreateOrderRequest): Promise<void> {
-		orderRequest.request_id = this.generateRequestId();
-		this.validateOrderRequest(orderRequest);
+	public async verifyCredentials(orderRequest: { "key": string, "data": any }): Promise<boolean> {
+		try {
+			const data = await this.sendRequest<void>('post', '/v1/get_quote', orderRequest);
+			console.log("Here comes true", data);
+			return true;
+		} catch (error: any) {
+			if (error.data) {
+				return false;
+			}
+			else throw error;
+		}
+	}
+
+	public async getQuote(orderRequest: { "key": string, "data": any }): Promise<void> {
+		try {
+			const data = this.sendRequest<void>('post', '/v1/get_quote', orderRequest);
+			return data;
+		} catch (error) {
+			console.error('Error Quoting order ', error);
+			throw error;
+		}
+	}
+
+	public async createOrder(orderRequest: { "key": string, "data": CreateOrderRequest }): Promise<void> {
+		orderRequest.data.request_id = this.generateRequestId();
+		this.validateOrderRequest(orderRequest.data);
 
 		try {
 			const data = await this.sendRequest<void>('post', 'v1/orders/create', orderRequest);
@@ -93,7 +116,7 @@ class PORTER {
 		// Add more validation logic as needed for other properties
 	}
 
-	public async initiate_flow(orderRequest: { "order_id": string, "flow_type": number }): Promise<void> {
+	public async initiate_flow(orderRequest: { "key": string, "data": { "order_id": string, "flow_type": number } }): Promise<void> {
 		try {
 			const data = await this.sendRequest<void>('post', '/v1/simulation/initiate_order_flow', orderRequest);
 			return data;
@@ -102,7 +125,7 @@ class PORTER {
 		}
 	}
 
-	public async trackOrder(orderRequest: string): Promise<void> {
+	public async trackOrder(orderRequest: { "key": string, "data": string }): Promise<void> {
 		try {
 			const data = await this.sendRequest<void>('get', `/v1.1/orders/${orderRequest}`);
 			return data;
@@ -111,7 +134,7 @@ class PORTER {
 		}
 	}
 
-	public async cancelOrder(orderRequest: string): Promise<void> {
+	public async cancelOrder(orderRequest: { "key": string, "data": string }): Promise<void> {
 		try {
 			const data = await this.sendRequest<void>('post', `/v1/orders/${orderRequest}/cancel`);
 			return data;

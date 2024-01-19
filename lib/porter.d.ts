@@ -38,13 +38,33 @@ declare class PORTER {
     constructor();
     private generateRequestId;
     private sendRequest;
-    createOrder(orderRequest: CreateOrderRequest): Promise<void>;
+    verifyCredentials(orderRequest: {
+        "key": string;
+        "data": any;
+    }): Promise<boolean>;
+    getQuote(orderRequest: {
+        "key": string;
+        "data": any;
+    }): Promise<void>;
+    createOrder(orderRequest: {
+        "key": string;
+        "data": CreateOrderRequest;
+    }): Promise<void>;
     private validateOrderRequest;
     initiate_flow(orderRequest: {
-        "order_id": string;
-        "flow_type": number;
+        "key": string;
+        "data": {
+            "order_id": string;
+            "flow_type": number;
+        };
     }): Promise<void>;
-    trackOrder(orderRequest: string): Promise<void>;
-    cancelOrder(orderRequest: string): Promise<void>;
+    trackOrder(orderRequest: {
+        "key": string;
+        "data": string;
+    }): Promise<void>;
+    cancelOrder(orderRequest: {
+        "key": string;
+        "data": string;
+    }): Promise<void>;
 }
 export default PORTER;

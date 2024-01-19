@@ -159,10 +159,39 @@ class Delivery {
 			} else if (provider == 'DHL') {
 				const data = await dhl.verifyCredentials(providerData);
 				return data;
+			} else if (provider == 'porter') {
+				const data = await porter.verifyCredentials({
+					"key": providerData.apiKey, "data": {
+						"pickup_details": {
+							"lat": 12.935025018880504,
+							"lng": 77.6092605236106
+						},
+						"drop_details": {
+							"lat": 12.947146336879577,
+							"lng": 77.62102993895199
+						},
+						"customer": {
+							"name": "salik",
+							"mobile": {
+								"country_code": "+91",
+								"number": "7678139714"
+							}
+						}
+					}
+				});
+				return data;
 			}
 		} catch (error: any) {
 			throw error;
 
+		}
+	}
+	getQuote = async (providerData: any) => {
+		try {
+			const data = await porter.getQuote(providerData);
+			return data
+		} catch (error: unknown) {
+			throw error;
 		}
 	}
 	// porter API's
@@ -176,7 +205,7 @@ class Delivery {
 		}
 
 	}
-
+	// initiate flow
 	initiateFlow = async (providerData: any) => {
 		try {
 			const data = await porter.initiate_flow(providerData);
@@ -185,7 +214,7 @@ class Delivery {
 			throw error;
 		}
 	}
-
+	// track order
 	trackOrder = async (providerData: any) => {
 		try {
 			const data = await porter.trackOrder(providerData);
@@ -194,7 +223,7 @@ class Delivery {
 			throw error;
 		}
 	}
-
+	// cancel order
 	cancelOrder = async (providerData: any) => {
 		try {
 			const data = await porter.cancelOrder(providerData);
