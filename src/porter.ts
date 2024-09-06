@@ -59,6 +59,7 @@ class PORTER {
 
 	private async sendRequest<T>(method: string, url: string, data?: any): Promise<T> {
 		try {
+			console.log(data, url, method, "Here is all the data")
 			const response: AxiosResponse<T> = await axios({
 				headers: {
 					'x-api-key': data.key,
@@ -69,7 +70,7 @@ class PORTER {
 			});
 			return response.data;
 		} catch (error: any) {
-			throw error.response || error.message || error;
+			throw error?.response || error?.message || error;
 		}
 	}
 
@@ -97,10 +98,9 @@ class PORTER {
 	}
 
 	public async createOrder(orderRequest: { "key": string, "data": CreateOrderRequest }): Promise<void> {
-		orderRequest.data.request_id = this.generateRequestId();
-		this.validateOrderRequest(orderRequest.data);
-
 		try {
+			orderRequest.data.request_id = this.generateRequestId();
+			this.validateOrderRequest(orderRequest.data);
 			const data = await this.sendRequest<void>('post', 'v1/orders/create', orderRequest);
 			return data;
 		} catch (error) {
@@ -127,7 +127,7 @@ class PORTER {
 
 	public async trackOrder(orderRequest: { "key": string, "data": string }): Promise<void> {
 		try {
-			const data = await this.sendRequest<void>('get', `/v1.1/orders/${orderRequest}`);
+			const data = await this.sendRequest<void>('get', `/v1.1/orders/${orderRequest.data}`, orderRequest);
 			return data;
 		} catch (error) {
 			throw error
@@ -136,7 +136,7 @@ class PORTER {
 
 	public async cancelOrder(orderRequest: { "key": string, "data": string }): Promise<void> {
 		try {
-			const data = await this.sendRequest<void>('post', `/v1/orders/${orderRequest}/cancel`);
+			const data = await this.sendRequest<void>('post', `/v1/orders/${orderRequest.data}/cancel`, orderRequest);
 			return data;
 		} catch (error) {
 			throw error;
