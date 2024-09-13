@@ -81,4 +81,4 @@ class Delivery {
 	}
 }
 
-export { Delivery };
+export default Delivery;
