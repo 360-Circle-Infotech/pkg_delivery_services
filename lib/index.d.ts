@@ -7,4 +7,4 @@ declare class Delivery {
     trackOrder: (providerData: any) => Promise<void>;
     cancelOrder: (providerData: any) => Promise<void>;
 }
-export { Delivery };
+export default Delivery;
