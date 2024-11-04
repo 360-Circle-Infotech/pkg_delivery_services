@@ -5,79 +5,35 @@ class Delivery {
 	constructor() {
 		// Nothing to be done here
 	}
-	verifyCredentials = async (provider: string, providerData: any) => {
+
+	AllDelivery = async (provider: string, providerData: any) => {
 		try {
-			if (provider == 'porter') {
-				const data = await porter.verifyCredentials({
-					"key": providerData.apiKey, "data": {
-						"pickup_details": {
-							"lat": 12.935025018880504,
-							"lng": 77.6092605236106
-						},
-						"drop_details": {
-							"lat": 12.947146336879577,
-							"lng": 77.62102993895199
-						},
-						"customer": {
-							"name": "salik",
-							"mobile": {
-								"country_code": "+91",
-								"number": "7678139714"
-							}
-						}
+
+			let func = providerData?.functionName;
+			if (provider === "porter") {
+				
+				// If provider is Porter then dynamically calls it's function
+				if (typeof (porter as any)[func] === "function") {
+					return await (porter as any)[func](providerData);
+				}
+
+				else {
+					return {
+						message: `Function ${func} does not exist in Porter`
 					}
-				});
-				return data;
+				}
 			}
-		} catch (error: unknown) {
-			throw error;
+			else {
+				return {
+					message: `Provider is not present`
+				}
+			}
 
-		}
-	}
-	getQuote = async (providerData: any) => {
-		try {
-			const data = await porter.getQuote(providerData);
-			return data
-		} catch (error: unknown) {
-			throw error;
-		}
-	}
-	// porter API's
-	createOrder = async (providerData: any) => {
-		try {
-			const data = await porter.createOrder(providerData);
-			return data
-		} catch (error: unknown) {
-			throw error;
-		}
-
-	}
-	// initiate flow
-	initiateFlow = async (providerData: any) => {
-		try {
-			const data = await porter.initiate_flow(providerData);
-			return data;
-		} catch (error: unknown) {
-			throw error;
-		}
-	}
-	// track order
-	trackOrder = async (providerData: any) => {
-		try {
-			const data = await porter.trackOrder(providerData);
-			return data;
-		} catch (error: unknown) {
-			throw error;
-		}
-	}
-	// cancel order
-	cancelOrder = async (providerData: any) => {
-		try {
-			const data = await porter.cancelOrder(providerData);
-			return data;
 		} catch (error) {
+			console.log(error);
 			throw error;
 		}
+
 	}
 }
 

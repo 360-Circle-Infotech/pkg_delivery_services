@@ -1,148 +1,187 @@
-/* eslint-disable no-useless-catch */
+// @ts-ignore
 import axios, { AxiosResponse } from "axios";
-
-
-
-interface CreateOrderRequest {
-	request_id?: string;
-	pickup_details: Address;
-	drop_details: Address;
-	additional_comments?: string | null;
-	delivery_instructions?: DeliveryInstructions;
-}
-
-interface Address {
-	address: AddressDetails;
-}
-
-interface AddressDetails {
-	apartment_address?: string | null;
-	street_address1: string;
-	street_address2?: string | null;
-	landmark?: string | null;
-	city?: string | null;
-	state?: string | null;
-	pincode?: string | null;
-	country?: string | null;
-	lat: number;
-	lng: number;
-	contact_details: ContactDetails;
-}
-
-interface ContactDetails {
-	name: string;
-	phone_number: string;
-}
-
-interface DeliveryInstructions {
-	instructions_list: Instruction[];
-}
-
-type Instruction = MessageInstruction;
-
-interface MessageInstruction {
-	type: string;
-	description: string;
-}
-
+import { v4 as uuidv4 } from 'uuid';
 
 class PORTER {
-	private apiUrl = 'https://pfe-apigw-uat.porter.in/';
+	private apiUrl = 'https://pfe-apigw-uat.porter.in';
 
 	constructor() {
 		// do nothing
 	}
 
 	private generateRequestId(): string {
-		return 'Qafto-' + Date.now().toString(36) + Math.random().toString(36).substr(2);
-	}
+		return 'Qafto-' + uuidv4().replace(/-/g, '').slice(0, 32);
+	};
 
-	private async sendRequest<T>(method: string, url: string, data?: any): Promise<T> {
+	private async sendRequest(method: string, url: string, data?: any) {
 		try {
-			console.log(data, url, method, "Here is all the data")
-			const response: AxiosResponse<T> = await axios({
+			// console.log(data, method, url, "Here is all the data");
+
+			const response: AxiosResponse = await axios({
 				headers: {
-					'x-api-key': data.key,
+					'x-api-key': data?.key,
+					'Content-Type': 'application/json'
 				},
 				method,
 				url: `${this.apiUrl}${url}`,
-				data: data.data,
+				data: data?.data,
 			});
-			return response.data;
-		} catch (error: any) {
+
+			console.log("response", response);
+			return response;
+		}
+
+		catch (error: any) {
+			console.error("An error occurred:", error);
 			throw error?.response || error?.message || error;
 		}
-	}
+	};
 
-	public async verifyCredentials(orderRequest: { "key": string, "data": any }): Promise<boolean> {
+	public async verifyCredentials(providerData: any) {
 		try {
-			const data = await this.sendRequest<void>('post', '/v1/get_quote', orderRequest);
+			let orderRequest = {
+				"pickup_details": {
+					"lat": 12.935025018880504,
+					"lng": 77.6092605236106
+				},
+				"drop_details": {
+					"lat": 12.947146336879577,
+					"lng": 77.62102993895199
+				},
+				"customer": {
+					"name": "salik",
+					"mobile": {
+						"country_code": "+91",
+						"number": "7678139714"
+					}
+				}
+			};
+
+			// Send request using POST method
+			const data = await this.sendRequest('POST', '/v1/get_quote', { key: providerData?.key, data: orderRequest });
 			console.log("Here comes true", data);
-			return true;
+			return data?.status === 200;
+
 		} catch (error: any) {
-			if (error.data) {
+			console.error("Error verifying credentials:", error);
+			if (error?.data) {
 				return false;
-			}
-			else throw error;
+			} else throw error;
 		}
 	}
 
-	public async getQuote(orderRequest: { "key": string, "data": any }): Promise<void> {
+	public async getQuote(providerData: any) {
 		try {
-			const data = this.sendRequest<void>('post', '/v1/get_quote', orderRequest);
-			return data;
-		} catch (error) {
+			const data = await this.sendRequest('POST', '/v1/get_quote', providerData);
+			if(data?.status === 200){
+				return data?.data;
+			}
+
+			return {
+				status: data?.status,
+				message: "Failed to fetch estimate"
+			}
+		}
+
+		catch (error) {
 			console.error('Error Quoting order ', error);
 			throw error;
 		}
-	}
+	};
 
-	public async createOrder(orderRequest: { "key": string, "data": CreateOrderRequest }): Promise<void> {
+	public async createOrder(providerData: any) {
 		try {
-			orderRequest.data.request_id = this.generateRequestId();
-			this.validateOrderRequest(orderRequest.data);
-			const data = await this.sendRequest<void>('post', 'v1/orders/create', orderRequest);
-			return data;
-		} catch (error) {
+			providerData.data.request_id = this.generateRequestId();
+			this.validateOrderRequest(providerData.data);
+			const data = await this.sendRequest('POST', '/v1/orders/create', providerData);
+			console.log(data);
+
+			if(data?.status === 200 || data?.status === 201){
+				return data?.data;
+			}
+
+			return {
+				status: data?.status,
+				message:"Failed to create"
+			}
+		}
+
+		catch (error) {
 			console.error('Error creating order:', error);
 			throw error;
 		}
-	}
+	};
 
-	private validateOrderRequest(orderRequest: CreateOrderRequest): void {
-		if (!orderRequest.request_id || typeof orderRequest.request_id !== 'string') {
+	private validateOrderRequest(data: any) {
+		if (!data.request_id || typeof data.request_id !== 'string') {
 			throw new Error('Invalid order request: requestId is required and must be a string.');
 		}
-		// Add more validation logic as needed for other properties
-	}
 
-	public async initiate_flow(orderRequest: { "key": string, "data": { "order_id": string, "flow_type": number } }): Promise<void> {
+	};
+
+	public async initiate_flow(providerData: any) {
 		try {
-			const data = await this.sendRequest<void>('post', '/v1/simulation/initiate_order_flow', orderRequest);
-			return data;
-		} catch (error) {
+			const data = await this.sendRequest('POST', '/v1/simulation/initiate_order_flow', providerData);
+			console.log(data);
+
+			if (data?.status === 200) {
+				return data?.data;
+			}
+
+			return {
+				status: data?.status,
+				message: "Failed initiate_flow"
+			}
+		}
+
+		catch (error) {
 			throw error
 		}
-	}
+	};
 
-	public async trackOrder(orderRequest: { "key": string, "data": string }): Promise<void> {
+	public async trackOrder(providerData: any) {
 		try {
-			const data = await this.sendRequest<void>('get', `/v1.1/orders/${orderRequest.data}`, orderRequest);
-			return data;
-		} catch (error) {
+			let orderId = providerData?.data?.orderId;
+			const data = await this.sendRequest('GET', `/v1.1/orders/${orderId}`, providerData);
+
+			console.log(data);
+
+			if (data?.status === 200) {
+				return data?.data;
+			}
+
+			return {
+				status: data?.status,
+				message: "Can't Track"
+			}
+		}
+
+		catch (error) {
 			throw error
 		}
-	}
+	};
 
-	public async cancelOrder(orderRequest: { "key": string, "data": string }): Promise<void> {
+	public async cancelOrder(providerData: any) {
 		try {
-			const data = await this.sendRequest<void>('post', `/v1/orders/${orderRequest.data}/cancel`, orderRequest);
-			return data;
-		} catch (error) {
+			let orderId = providerData?.data?.orderId;
+			const data = await this.sendRequest('POST', `/v1/orders/${orderId}/cancel`, providerData);
+
+			console.log(data);
+
+			if (data?.status === 200) {
+				return data?.data;
+			}
+
+			return {
+				status: data?.status,
+				message: "Can't Cancel"
+			}
+		}
+
+		catch (error) {
 			throw error;
 		}
-	}
-
+	};
 }
 
 export default PORTER;
