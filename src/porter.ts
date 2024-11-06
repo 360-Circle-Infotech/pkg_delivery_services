@@ -1,6 +1,5 @@
 // @ts-ignore
 import axios, { AxiosResponse } from "axios";
-import { v4 as uuidv4 } from 'uuid';
 
 class PORTER {
 	private apiUrl = 'https://pfe-apigw-uat.porter.in';
@@ -10,8 +9,8 @@ class PORTER {
 	}
 
 	private generateRequestId(): string {
-		return 'Qafto-' + uuidv4().replace(/-/g, '').slice(0, 32);
-	};
+		return 'Qafto-' + Date.now().toString(36) + Math.random().toString(36).substr(2);
+	}
 
 	private async sendRequest(method: string, url: string, data?: any) {
 		try {
